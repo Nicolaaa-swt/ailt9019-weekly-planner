@@ -39,6 +39,8 @@ class WeeklyPlannerTests(unittest.TestCase):
         with redirect_stdout(output):
             self.planner.show()
         self.assertIn("Large task: 1 hour(s) could not be scheduled", output.getvalue())
+        self.assertIn("不可行性报告", output.getvalue())
+        self.assertIn("原因", output.getvalue())
 
     def test_invalid_busy_period_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "between 1 and 7"):
