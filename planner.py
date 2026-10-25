@@ -20,30 +20,63 @@ class TimeSlot:
 
 
 class WeeklyPlanner:
+    SLOT_MINUTES = 30
+
     def __init__(self, week_start: datetime):
-        self.week_start = week_start
+        # Keep one date-only anchor so that adding 9 hours really means 09:00.
+        # Previously, callers passed 09:00 and the planner added another 9 hours,
+        # which made every day start at 18:00.
+        self.week_start = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
         self.time_slots: List[TimeSlot] = []
-        day = week_start
-        for _ in range(7):
-            h = 9
-            while h < 22:
-                s = day + timedelta(hours=h)
-                e = day + timedelta(hours=h + 1)
+        self.unscheduled_tasks: List[tuple[Task, float]] = []
+        for day_idx in range(7):
+            day_start = self.week_start + timedelta(days=day_idx, hours=9)
+            for slot_idx in range(13 * 60 // self.SLOT_MINUTES):
+                s = day_start + timedelta(minutes=slot_idx * self.SLOT_MINUTES)
+                e = s + timedelta(minutes=self.SLOT_MINUTES)
                 self.time_slots.append(TimeSlot(start=s, end=e))
-                h += 1
-            day += timedelta(days=1)
 
     # weekday_idx: 1=本周第1天（今天），2=第2天 ...7=第7天
     def add_busy_by_day_index(self, day_idx: int, start_hm: str, end_hm: str):
-        sh, sm = map(int, start_hm.split(":"))
-        eh, em = map(int, end_hm.split(":"))
+        if not 1 <= day_idx <= 7:
+            raise ValueError("day_idx must be between 1 and 7")
+
+        try:
+            sh, sm = map(int, start_hm.split(":"))
+            eh, em = map(int, end_hm.split(":"))
+        except ValueError as exc:
+            raise ValueError("times must use HH:MM format") from exc
+
+        if not (0 <= sh <= 23 and 0 <= eh <= 23 and 0 <= sm <= 59 and 0 <= em <= 59):
+            raise ValueError("times must be valid 24-hour times")
+
         busy_start = self.week_start + timedelta(days=day_idx - 1, hours=sh, minutes=sm)
         busy_end = self.week_start + timedelta(days=day_idx - 1, hours=eh, minutes=em)
+        working_start = self.week_start + timedelta(days=day_idx - 1, hours=9)
+        working_end = self.week_start + timedelta(days=day_idx - 1, hours=22)
+        if busy_start >= busy_end:
+            raise ValueError("busy time must end after it starts")
+        if busy_start < working_start or busy_end > working_end:
+            raise ValueError("busy time must be within 09:00-22:00")
+
         for slot in self.time_slots:
             if not (slot.end <= busy_start or slot.start >= busy_end):
                 slot.unavailable = True
 
     def schedule(self, tasks: List[Task]):
+        for slot in self.time_slots:
+            slot.task = None
+        self.unscheduled_tasks = []
+
+        for task in tasks:
+            if task.duration_hour <= 0:
+                raise ValueError(f"task '{task.name}' must have a positive duration")
+            slot_count = task.duration_hour * 60 / self.SLOT_MINUTES
+            if not slot_count.is_integer():
+                raise ValueError(
+                    f"task '{task.name}' duration must be in {self.SLOT_MINUTES}-minute increments"
+                )
+
         sorted_tasks = sorted(tasks, key=lambda x: (x.priority, x.deadline))
         for t in sorted_tasks:
             remain = t.duration_hour
@@ -57,7 +90,11 @@ class WeeklyPlanner:
                 if slot.end > t.deadline:
                     continue
                 slot.task = t
-                remain -= 1
+                remain -= self.SLOT_MINUTES / 60
+            if remain > 0:
+                self.unscheduled_tasks.append((t, remain))
+
+        return self.unscheduled_tasks
 
     def show(self):
         print("\n===== Weekly Schedule =====")
@@ -69,3 +106,8 @@ class WeeklyPlanner:
             else:
                 text = "[Free]"
             print(f"{s.start.strftime('%a %Y-%m-%d %H:%M')} ~ {s.end.strftime('%H:%M')} | {text}")
+
+        if self.unscheduled_tasks:
+            print("\n===== Scheduling Warnings =====")
+            for task, hours in self.unscheduled_tasks:
+                print(f"⚠️ {task.name}: {hours:g} hour(s) could not be scheduled before the deadline")

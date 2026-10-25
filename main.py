@@ -2,8 +2,8 @@ from planner import WeeklyPlanner, Task
 from datetime import datetime
 
 if __name__ == "__main__":
-    # ✅ 自动拿今天，作为一周第一天
-    today = datetime.now().replace(hour=9, minute=0, second=0, microsecond=0)
+    # 自动拿今天，作为七天计划的第一天；具体工作时间由 planner 定义。
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     planner = WeeklyPlanner(today)
 
     print("===== 任务排班工具 =====")
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     for i in range(task_count):
         print(f"\n--- 第{i+1}个任务 ---")
         name = input("任务名称：")
-        duration = float(input("需要多少小时："))
+        duration = float(input("需要多少小时（以0.5小时为单位）："))
         dl_date = input("截止日期【YYYY-MM-DD，例：2026-10-30】：")
         dl_time = input("截止时间【HH:MM，例：23:59】：")
         priority = int(input("优先级（1最高，数字越大越低）："))
