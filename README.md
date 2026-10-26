@@ -13,7 +13,34 @@ No LLM used.
 4. Schedule in 30-minute blocks between 09:00 and 22:00
 5. Warn when a task cannot be completed before its deadline
 
-## How to run
+## How to run (Web)
+
+Requires Node.js 20.9 or later and npm.
+
+From the repository root, install the web app's dependencies and start the
+development server:
+
+```bash
+cd planner-web
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser. If that port
+is already in use, use the local URL printed in the terminal. Press Ctrl+C to
+stop the server.
+
+To build and run the production version, run these commands inside `planner-web`:
+
+```bash
+npm run build
+npm start
+```
+
+The web app runs its scheduler in the browser; no Python backend is required.
+Tasks, classes, and preferences are saved in the browser's localStorage.
+
+## How to run (CLI)
 
 Requires Python 3.9 or later.
 

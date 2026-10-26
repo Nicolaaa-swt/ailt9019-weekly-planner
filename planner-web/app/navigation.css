@@ -1,0 +1,8 @@
+.week-nav-button { display: flex; width: auto; height: 36px; gap: 7px; padding: 0 9px; font-size: 12px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.week-nav-button svg { flex-shrink: 0; }
+.week-navigation { gap: 6px; }
+.calendar-controls { flex-wrap: wrap; }
+@media (max-width: 420px) {
+  .week-nav-button { padding-inline: 5px; gap: 4px; font-size: 11px; }
+  .week-navigation { gap: 3px; }
+}

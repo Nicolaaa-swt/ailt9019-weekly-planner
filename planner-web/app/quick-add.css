@@ -1,0 +1,12 @@
+.task-quick-add { display: flex; flex-direction: column; gap: 7px; margin: -6px 0 20px; }
+.quick-add-row { display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: center; gap: 8px; min-height: 28px; }
+.quick-add-label { color: var(--muted); font-size: 11px; letter-spacing: inherit; }
+.quick-add-options { display: flex; align-items: center; gap: 8px; overflow-x: auto; min-width: 0; scrollbar-width: thin; }
+.quick-add-suggestion { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 2px; max-width: 180px; padding: 4px 2px; border: 0; background: transparent; color: #356abb; font-size: 12px; line-height: 1.5; text-align: left; }
+.quick-add-suggestion span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.quick-add-suggestion svg { flex-shrink: 0; }
+.quick-add-suggestion:hover:not(:disabled) { color: #1a4d99; text-decoration: underline; text-underline-offset: 3px; }
+.quick-add-suggestion:disabled { opacity: .45; cursor: default; }
+.quick-add-empty { color: var(--muted); font-size: 11px; }
+.planner[data-theme="dark"] .quick-add-suggestion { color: #8db9ff; }
+.planner[data-theme="dark"] .quick-add-suggestion:hover:not(:disabled) { color: #bbd5ff; }
