@@ -22,7 +22,8 @@ class TimeSlot:
 class WeeklyPlanner:
     SLOT_MINUTES = 30
 
-    def __init__(self, week_start: datetime):
+    def __init__(self, week_start: datetime, language: str = "chinese"):
+        self.language = language
         # Use a date-only anchor so every day begins at 09:00, regardless of
         # the time included in week_start.
         self.week_start = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -95,32 +96,52 @@ class WeeklyPlanner:
             if remain > 0:
                 self.unscheduled_tasks.append((t, remain))
                 if any(slot.unavailable for slot in self.time_slots if slot.end <= t.deadline):
-                    reason = "截止前没有足够可用时间（含固定事务占用）"
+                    reason = ("Not enough available time before the deadline (including fixed busy periods)"
+                              if self.language == "english" else "截止前没有足够可用时间（含固定事务占用）")
                 else:
-                    reason = "截止时间太近或总空闲时间不足"
+                    reason = ("The deadline is too soon or there is not enough free time"
+                              if self.language == "english" else "截止时间太近或总空闲时间不足")
                 self.unscheduled_reports.append(
                     {"task": t, "remaining_hour": remain, "reason": reason}
                 )
 
         return self.unscheduled_tasks
 
-    def show(self):
+    def show_list(self):
         print("\n===== Weekly Schedule =====")
-        for s in self.time_slots:
-            if s.unavailable:
+        for slot in self.time_slots:
+            if slot.unavailable:
                 text = "[Busy / Unavailable]"
-            elif s.task:
-                text = s.task.name
+            elif slot.task:
+                text = slot.task.name
             else:
                 text = "[Free]"
-            print(f"{s.start.strftime('%a %Y-%m-%d %H:%M')} ~ {s.end.strftime('%H:%M')} | {text}")
+            print(
+                f"{slot.start:%a %Y-%m-%d %H:%M} ~ "
+                f"{slot.end:%H:%M} | {text}"
+            )
+
+    def show(self):
+        try:
+            from schedule_grid import print_schedule_grid
+        except ImportError:
+            self.show_list()
+        else:
+            print_schedule_grid(self.time_slots, self.language)
 
         if self.unscheduled_reports:
-            print("\n===== ⚠️ 不可行性报告 =====")
+            print("\n===== ⚠️ Unscheduled Tasks =====" if self.language == "english"
+                  else "\n===== ⚠️ 不可行性报告 =====")
             for report in self.unscheduled_reports:
                 task = report["task"]
                 hours = report["remaining_hour"]
-                print(
-                    f"⚠️ {task.name}: {hours:g} hour(s) could not be scheduled "
-                    f"before the deadline（原因：{report['reason']}）"
-                )
+                if self.language == "english":
+                    print(
+                        f"⚠️ {task.name}: {hours:g} hour(s) could not be scheduled "
+                        f"before the deadline (Reason: {report['reason']})"
+                    )
+                else:
+                    print(
+                        f"⚠️ {task.name}：还有 {hours:g} 小时无法在截止时间前安排"
+                        f"（原因：{report['reason']}）"
+                    )

@@ -38,7 +38,7 @@ class WeeklyPlannerTests(unittest.TestCase):
         output = io.StringIO()
         with redirect_stdout(output):
             self.planner.show()
-        self.assertIn("Large task: 1 hour(s) could not be scheduled", output.getvalue())
+        self.assertIn("Large task：还有 1 小时无法在截止时间前安排", output.getvalue())
         self.assertIn("不可行性报告", output.getvalue())
         self.assertIn("原因", output.getvalue())
 
