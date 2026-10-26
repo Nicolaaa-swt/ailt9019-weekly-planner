@@ -36,13 +36,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser. If that por
 is already in use, use the local URL printed in the terminal. Press Ctrl+C to
 stop the server.
 
-To build and run the production version, run these commands inside `planner-web`:
-
-```bash
-npm run build
-npm start
-```
-
 The web app runs its scheduler in the browser; no Python backend is required.
 Tasks, classes, and preferences are saved in the browser's localStorage.
 
@@ -132,14 +125,13 @@ Ran 12 tests
 OK
 ```
 
-For the web app, run the type check, 13 calendar and scheduler tests, and production build:
+For the web app, run the type check and 13 calendar and scheduler tests:
 
 ```bash
 cd planner-web
 npx tsc --noEmit
 node app/calendar-events.test.mjs
 node app/task-scheduler.test.mjs
-npm run build
 ```
 
 The direct TypeScript test commands require a Node.js version that supports importing TypeScript source directly; they are verified with Node.js 26.

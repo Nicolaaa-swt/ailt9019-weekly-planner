@@ -27,7 +27,6 @@ Task-name suggestions use saved class names and the CLI sample tasks.
 npx tsc --noEmit
 node app/calendar-events.test.mjs
 node app/task-scheduler.test.mjs
-npm run build
 ```
 
 The Node test commands require a Node version that supports importing TypeScript
