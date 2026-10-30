@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type Pointe
 
 import { dateKey, occursOn, overlaps, readEntries, slotTime, TOTAL_SLOTS, type CalendarEntry, type EntryKind } from "./calendar-events";
 import EntryEditor from "./entry-editor";
+import AIChat from "./ai-chat";
 import TaskSchedulerDialog from "./task-scheduler-dialog";
 import { readScheduleReports, scheduleTasks, type TaskRequest, type ScheduleReport } from "./task-scheduler";
 import { schedulerCopy } from "./scheduler-copy";
@@ -196,9 +197,16 @@ export default function Calendar({ today }: { today: string }) {
   }
 
   return (
-    <main className="planner" lang={lang === "zh" ? "zh-Hant" : lang} data-theme={theme === "dark" ? "dark" : "light"} data-editing={mode !== null}>
+    <main className="planner" lang={lang === "zh" ? "zh-Hant" : lang} data-theme={theme === "dark" ? "dark" : "light"} data-editing={mode !== null}
+      onDoubleClick={event => {
+        const target = event.target as Element;
+        if (draft || scheduler || target.closest('.calendar, dialog, button, a, input, select, textarea, [role="button"], [contenteditable="true"], .ai-chat-panel')) return;
+        cancelSelection();
+        setMode(null);
+        setMessage("");
+      }}>
       <section ref={toolbarRef} className="calendar-toolbar" data-wrapped={toolbarWrapped} aria-label={t.calendar}>
-          <WeekHeading range={range} locale={locale} chinese={lang !== "en"} />
+          <WeekHeading first={start} last={end} range={range} locale={locale} chinese={lang !== "en"} />
           <div className="editing-tools">
           <div className="editing-actions">
           <button className="add-tasks-button" aria-label={t.addTasks} onClick={() => setScheduler({ report: null })}>+ {t.tasks}</button>
@@ -242,7 +250,7 @@ export default function Calendar({ today }: { today: string }) {
                   const slot = Array.from({ length: TOTAL_SLOTS }, (_, start) => ({ id: "", title: "", kind: mode, date: key, start, end: start + 1 })).find(entry => !overlaps(entries, entry));
                   if (slot) { setMessage(""); setDraft(slot); } else setMessage(t.conflict);
                 }}>
-                {entries.filter(entry => occursOn(entry, key)).map(entry => <CalendarEntryBlock key={entry.id} entry={entry} editable={mode === entry.kind} kindLabel={entry.kind === "task" ? t.tasks : t.classes} onEdit={() => { if (mode === entry.kind) { setMessage(""); setDraft(entry); } }} />)}
+                {entries.filter(entry => occursOn(entry, key)).map(entry => <CalendarEntryBlock key={entry.id} entry={entry} editable={mode === entry.kind} kindLabel={entry.kind === "task" ? t.tasks : t.classes} onEdit={() => { if (mode === entry.kind) { setMessage(""); setDraft(entry); } }} onSelectMode={() => { cancelSelection(); setMode(entry.kind); setMessage(""); }} />)}
                 {preview && <div className={`selection-preview ${preview.kind} ${overlaps(entries, preview) ? "conflict" : ""}`} style={{ top: `${preview.start / TOTAL_SLOTS * 100}%`, height: `${(preview.end - preview.start) / TOTAL_SLOTS * 100}%` }}>{slotTime(preview.start)}–{slotTime(preview.end)}</div>}
               </div>;
             })}
@@ -256,6 +264,7 @@ export default function Calendar({ today }: { today: string }) {
         savePreference("weekspace-schedule-reports", JSON.stringify(latest));
         setScheduler(null);
       }} onClose={() => setScheduler(null)} />}
+      <AIChat language={lang} calendar={{ weekStart: dateKey(start), weekEnd: dateKey(end), entries }} />
     </main>
   );
 }

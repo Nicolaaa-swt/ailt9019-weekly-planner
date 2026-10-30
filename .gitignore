@@ -3,3 +3,6 @@ __pycache__/
 .vscode/
 language.txt
 schedules/
+
+# Local API keys and environment variables
+.env

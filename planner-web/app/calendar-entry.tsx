@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { slotTime, TOTAL_SLOTS, type CalendarEntry } from "./calendar-events";
 
-export default function CalendarEntryBlock({ entry, editable, kindLabel, onEdit }: {
-  entry: CalendarEntry; editable: boolean; kindLabel: string; onEdit: () => void;
+export default function CalendarEntryBlock({ entry, editable, kindLabel, onEdit, onSelectMode }: {
+  entry: CalendarEntry; editable: boolean; kindLabel: string; onEdit: () => void; onSelectMode: () => void;
 }) {
   const button = useRef<HTMLButtonElement>(null);
   const titleText = useRef<HTMLSpanElement>(null);
@@ -28,9 +28,14 @@ export default function CalendarEntryBlock({ entry, editable, kindLabel, onEdit 
     return () => observer.disconnect();
   }, [compact, entry.title, time]);
 
-  return <button ref={button} className={`calendar-event ${entry.kind}${compact ? " compact-event" : ""}`} data-hide-time={compact && hideTime} disabled={!editable}
-    style={{ top: `calc(${entry.start / TOTAL_SLOTS * 100}% + 1px)`, height: `calc(${(entry.end - entry.start) / TOTAL_SLOTS * 100}% - 2px)` }}
-    onClick={onEdit} title={`${entry.title}, ${time}`} aria-label={`${entry.title}, ${time}, ${kindLabel}`}>
+  return <button ref={button} className={`calendar-event ${entry.kind}${compact ? " compact-event" : ""}`} data-hide-time={compact && hideTime} data-editable={editable}
+    style={{ top: `calc(${entry.start / TOTAL_SLOTS * 100}% + 2px)`, height: `calc(${(entry.end - entry.start) / TOTAL_SLOTS * 100}% - 4px)` }}
+    onClick={event => {
+      if (editable) onEdit();
+      else if (event.detail === 0) onSelectMode();
+    }}
+    onDoubleClick={event => { if (!editable) { event.preventDefault(); onSelectMode(); } }}
+    title={`${entry.title}, ${time}`} aria-label={`${entry.title}, ${time}, ${kindLabel}`}>
     <strong><span ref={titleText} className="event-title-text">{entry.title}</span></strong>
     <span ref={timeText} className="event-time">{time}</span>
   </button>;

@@ -6,10 +6,10 @@ import "./navigation.css";
 import "./toolbar.css";
 import "./quick-add.css";
 import "./scheduler.css";
+import "./ai-chat.css";
 
 export const metadata: Metadata = {
-  title: "Weekspace — Weekly Planner",
-  description: "A little structure. More room to focus. Your minimal weekly calendar.",
+  title: "AI Planner",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

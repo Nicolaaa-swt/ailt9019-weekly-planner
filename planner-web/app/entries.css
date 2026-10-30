@@ -19,10 +19,11 @@
 .calendar-event.class, .selection-preview.class { background: #e4f2ee; color: #265e50; border-color: #8bb7a8; border-left-color: #4c8975; }
 .calendar-event { border: 1px solid #436da8; transition: box-shadow .15s ease; }
 .calendar-event.class { border-color: #4c8975; }
-.calendar-event:disabled { cursor: default; opacity: 1; }
-.calendar-event:not(:disabled) { box-shadow: 0 4px 12px #10244345, 0 1px 4px #10244325; }
-.planner[data-theme="dark"] .calendar-event:not(:disabled) { box-shadow: 0 4px 14px #0009, 0 1px 5px #0006; }
-.calendar-event:not(:disabled):hover { filter: brightness(.96); box-shadow: 0 5px 16px #10244355, 0 2px 5px #10244330; }
+.calendar-event[data-editable="false"] { cursor: default; opacity: 1; }
+.calendar-event[data-editable="true"] { box-shadow: 0 4px 12px #10244345, 0 1px 4px #10244325; }
+.planner[data-theme="dark"] .calendar-event[data-editable="true"] { box-shadow: 0 0 0 1px #91baff70, 0 0 12px #6399ed60, 0 5px 16px #000b; }
+.planner[data-theme="dark"] .calendar-event.class[data-editable="true"] { box-shadow: 0 0 0 1px #97dec670, 0 0 12px #60c7a660, 0 5px 16px #000b; }
+.calendar-event[data-editable="true"]:hover { filter: brightness(.96); box-shadow: 0 5px 16px #10244355, 0 2px 5px #10244330; }
 .selection-preview { pointer-events: none; border-style: dashed; z-index: 3; opacity: .85; }
 .selection-preview.conflict { background: #f9e2e3; color: #952f3b; border-color: #bd6570; }
 .planner[data-theme="dark"] .calendar-event.task, .planner[data-theme="dark"] .selection-preview.task { background: #233e65; color: #d1e1ff; }

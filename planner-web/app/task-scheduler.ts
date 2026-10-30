@@ -17,8 +17,8 @@ export function validTask(task: TaskRequest) {
     && validDate(date || "") && /^([01]\d|2[0-3]):[0-5]\d$/.test(time || "") && task.deadline.length === 16;
 }
 
-/** The CLI's greedy scheduler: priority, deadline, then earliest free half-hour. */
-export function scheduleTasks(weekStart: string, tasks: TaskRequest[], existing: CalendarEntry[]) {
+/** Greedy scheduling by priority and deadline, skipping dates before today in Hong Kong. */
+export function scheduleTasks(weekStart: string, tasks: TaskRequest[], existing: CalendarEntry[], now = new Date()) {
   if (!validDate(weekStart) || tasks.some(task => !validTask(task)) || new Set(tasks.map(task => task.id)).size !== tasks.length) {
     throw new Error("Invalid scheduling input");
   }
@@ -27,6 +27,9 @@ export function scheduleTasks(weekStart: string, tasks: TaskRequest[], existing:
     date.setUTCDate(date.getUTCDate() + index);
     return date.toISOString().slice(0, 10);
   });
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Hong_Kong", year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(now);
   const occupied = [...existing];
   const generated: CalendarEntry[] = [];
   const outcomes: TaskOutcome[] = [];
@@ -36,6 +39,7 @@ export function scheduleTasks(weekStart: string, tasks: TaskRequest[], existing:
     let eligible = 0;
     let previous: CalendarEntry | undefined;
     for (const date of dates) {
+      if (date < today) continue;
       for (let slot = 0; slot < TOTAL_SLOTS && remaining > 0; slot++) {
         // Compare Hong Kong wall-clock values directly, independent of browser timezone.
         if (`${date}T${slotTime(slot + 1)}` > task.deadline) continue;
