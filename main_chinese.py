@@ -1,7 +1,6 @@
-from datetime import datetime
-
 from planner import WeeklyPlanner, Task
 from main import calendar_week_start, read_value, valid_duration
+from input_validation import parse_date_time
 
 
 def main(week_start=None):
@@ -35,11 +34,11 @@ def main(week_start=None):
             try:
                 dl_date = input("截止日期【YYYY-MM-DD，例：2026-10-30】：")
                 dl_time = input("截止时间【HH:MM，例：23:59】：")
-                priority = read_value("优先级（1最高，数字越大越低）：", valid=lambda n: n >= 1, language="chinese")
-                deadline = datetime.strptime(f"{dl_date} {dl_time}", "%Y-%m-%d %H:%M")
+                deadline = parse_date_time(dl_date, dl_time)
                 break
             except ValueError:
                 print('日期或时间无效，请使用YYYY-MM-DD和HH:MM格式。')
+        priority = read_value("优先级（1最高，数字越大越低）：", valid=lambda n: n >= 1, language="chinese")
         task_list.append(Task(name=name, duration_hour=duration, deadline=deadline, priority=priority))
 
     planner.schedule(task_list)

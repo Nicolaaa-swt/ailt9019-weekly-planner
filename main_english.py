@@ -1,7 +1,6 @@
-from datetime import datetime
-
 from planner import Task, WeeklyPlanner
 from main import calendar_week_start, read_value, valid_duration
+from input_validation import parse_date_time
 
 
 def main(week_start=None):
@@ -35,13 +34,11 @@ def main(week_start=None):
             try:
                 deadline_date = input("Deadline date (YYYY-MM-DD, e.g. 2026-10-30): ")
                 deadline_time = input("Deadline time (HH:MM, e.g. 23:59): ")
-                priority = read_value("Priority (1=highest; larger numbers=lower): ", valid=lambda n: n >= 1, language="english")
-                deadline = datetime.strptime(
-                    f"{deadline_date} {deadline_time}", "%Y-%m-%d %H:%M"
-                )
+                deadline = parse_date_time(deadline_date, deadline_time)
                 break
             except ValueError:
                 print('Invalid date or time. Use YYYY-MM-DD and HH:MM.')
+        priority = read_value("Priority (1=highest; larger numbers=lower): ", valid=lambda n: n >= 1, language="english")
         tasks.append(Task(name, duration, deadline, priority))
 
     planner.schedule(tasks)

@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from typing import List, Optional
 from datetime import datetime, timedelta
 
+from input_validation import parse_time
+
 
 @dataclass
 class Task:
@@ -42,14 +44,8 @@ class WeeklyPlanner:
         if not 1 <= day_idx <= 7:
             raise ValueError("day_idx must be between 1 and 7")
 
-        try:
-            sh, sm = map(int, start_hm.split(":"))
-            eh, em = map(int, end_hm.split(":"))
-        except ValueError as exc:
-            raise ValueError("times must use HH:MM format") from exc
-
-        if not (0 <= sh <= 23 and 0 <= eh <= 23 and 0 <= sm <= 59 and 0 <= em <= 59):
-            raise ValueError("times must be valid 24-hour times")
+        sh, sm = parse_time(start_hm)
+        eh, em = parse_time(end_hm)
 
         busy_start = self.week_start + timedelta(days=day_idx - 1, hours=sh, minutes=sm)
         busy_end = self.week_start + timedelta(days=day_idx - 1, hours=eh, minutes=em)
